@@ -28,6 +28,7 @@ jobs:
           find app/build/intermediates -path '*merged_manifest*' -name AndroidManifest.xml -exec cp {} out/merged-AndroidManifest.xml \; || true
           cp app/build/outputs/apk/release/*.apk out/ || true
           cp build.log out/build.log
+          mkdir -p out/tools && cp "$ANDROID_HOME/build-tools/35.0.0/lib/d8.jar" out/tools/ && cp "$ANDROID_HOME/build-tools/35.0.0/aapt2" out/tools/ || true
           ls -la out out/libs
       - name: Commit results
         run: |

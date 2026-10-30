@@ -23,10 +23,14 @@ jobs:
           gradle-version: '8.14.3'
       - name: Build and collect
         run: |
-          gradle --no-daemon --stacktrace :app:assembleRelease :app:collectLibs > build.log 2>&1 || (tail -200 build.log; exit 1)
-          gradle --no-daemon -q :app:dependencies --configuration releaseRuntimeClasspath > out/deps.txt || true
-          find app/build/intermediates -path '*merged_manifest*' -name AndroidManifest.xml -exec cp {} out/merged-AndroidManifest.xml \; || true
-          cp app/build/outputs/apk/release/*.apk out/ || true
+          gradle --no-daemon --stacktrace :app:assembleMyketRelease :app:assembleBazaarRelease :app:collectLibs > build.log 2>&1 || (tail -200 build.log; exit 1)
+          gradle --no-daemon -q :app:dependencies --configuration myketReleaseRuntimeClasspath > out/deps.txt || true
+          rm -f out/*.apk out/merged-*.xml
+          for f in myket bazaar; do
+            m=$(find app/build/intermediates -path "*merged_manifest*${f}Release*" -name AndroidManifest.xml | head -1)
+            [ -n "$m" ] && cp "$m" out/merged-AndroidManifest-$f.xml
+          done
+          ls app/build/outputs/apk/*/release/ || true
           cp build.log out/build.log
           mkdir -p out/tools && cp "$ANDROID_HOME/build-tools/35.0.0/lib/d8.jar" out/tools/ && cp "$ANDROID_HOME/build-tools/35.0.0/aapt2" out/tools/ || true
           ls -la out out/libs
@@ -34,6 +38,6 @@ jobs:
         run: |
           git config user.name "coral-bot"
           git config user.email "coral-bot@users.noreply.github.com"
-          git add out
+          git add -A out
           git commit -m "libs output [skip ci]" || echo "nothing to commit"
           git push

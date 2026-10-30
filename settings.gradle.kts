@@ -6,7 +6,6 @@ dependencyResolutionManagement {
         maven { url = uri("https://maven.tapsell.ir") }
         google()
         mavenCentral()
-        maven { url = uri("https://jitpack.io") }
     }
 }
 rootProject.name = "coral-libs"

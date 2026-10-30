@@ -1,0 +1,38 @@
+name: fetch-tapsell-libs
+on:
+  push:
+    branches: [coral-libs]
+  workflow_dispatch:
+permissions:
+  contents: write
+jobs:
+  libs:
+    if: "!contains(github.event.head_commit.message, '[skip ci]')"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v3
+        with:
+          packages: 'platforms;android-35 build-tools;35.0.0'
+      - uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: '8.14.3'
+      - name: Build and collect
+        run: |
+          gradle --no-daemon --stacktrace :app:assembleRelease :app:collectLibs > build.log 2>&1 || (tail -200 build.log; exit 1)
+          gradle --no-daemon -q :app:dependencies --configuration releaseRuntimeClasspath > out/deps.txt || true
+          find app/build/intermediates -path '*merged_manifest*' -name AndroidManifest.xml -exec cp {} out/merged-AndroidManifest.xml \; || true
+          cp app/build/outputs/apk/release/*.apk out/ || true
+          cp build.log out/build.log
+          ls -la out out/libs
+      - name: Commit results
+        run: |
+          git config user.name "coral-bot"
+          git config user.email "coral-bot@users.noreply.github.com"
+          git add out
+          git commit -m "libs output [skip ci]" || echo "nothing to commit"
+          git push

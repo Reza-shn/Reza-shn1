@@ -29,26 +29,30 @@
 
       <div id="accessBanner"></div>
 
-      <div class="widgets">
-        <button class="widget glass" data-go="apps">
-          <div class="w-head"><span class="w-ic blue"><i data-ic="apps"></i></span><span data-t="home.wApps"></span></div>
-          <div class="ring-row">
-            <svg class="ring" viewBox="0 0 64 64"><circle class="ring-bg" cx="32" cy="32" r="27"/><circle class="ring-fg" id="ringFg" cx="32" cy="32" r="27"/></svg>
-            <div><strong id="pct" class="w-big">0</strong><small id="pctSub" class="w-sub"></small></div>
+      <div class="hero glass">
+        <div class="hero-top">
+          <span class="status" id="statusPill"></span>
+          <span class="hero-date" id="heroDate"></span>
+        </div>
+        <div class="hero-main">
+          <div>
+            <strong class="hero-num" id="todayNum">0</strong>
+            <span class="hero-label" data-t="home.todayLabel"></span>
           </div>
-        </button>
-        <button class="widget glass" data-go="stats">
-          <div class="w-head"><span class="w-ic purple"><i data-ic="chart"></i></span><span data-t="home.wToday"></span></div>
-          <div class="today-row"><strong id="todayNum" class="w-big">0</strong><div class="spark" id="spark"></div></div>
-          <small class="w-sub" id="todaySub"></small>
-        </button>
+          <svg class="spark" id="spark" viewBox="0 0 160 60" preserveAspectRatio="none"></svg>
+        </div>
+        <div class="hero-stats">
+          <button data-go="stats"><b id="hsWeek">0</b><span data-t="home.week"></span></button>
+          <button data-go="apps"><b id="hsApps">0</b><span data-t="home.wApps"></span></button>
+          <button data-push="blocked"><b id="hsBlocked">0</b><span data-t="q.blocked"></span></button>
+        </div>
       </div>
 
-      <div class="quick">
-        <button data-go="history"><span class="q-ic glass blue"><i data-ic="clock"></i></span><span data-t="q.history"></span></button>
-        <button data-push="blocked"><span class="q-ic glass red"><i data-ic="bellSlash"></i></span><span data-t="q.blocked"></span></button>
-        <button data-action="test"><span class="q-ic glass purple"><i data-ic="send"></i></span><span data-t="q.test"></span></button>
-        <button data-action="clear"><span class="q-ic glass orange"><i data-ic="trash"></i></span><span data-t="q.clear"></span></button>
+      <div class="actions glass">
+        <button data-go="history"><i data-ic="clock"></i><span data-t="q.history"></span></button>
+        <button data-push="blocked"><i data-ic="bellSlash"></i><span data-t="q.blocked"></span></button>
+        <button data-action="test"><i data-ic="send"></i><span data-t="q.test"></span></button>
+        <button data-action="clear"><i data-ic="trash"></i><span data-t="q.clear"></span></button>
       </div>
 
       <div class="sec-head"><span data-t="home.recent"></span><button class="link" data-go="history" data-t="common.seeAll"></button></div>

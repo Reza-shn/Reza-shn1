@@ -11,7 +11,7 @@
   var STR = {
     en: {
       'home.title': 'Notifications', 'home.sub': 'Control and track what your apps send',
-      'home.wApps': 'Apps logged', 'home.wToday': 'Today', 'home.ofApps': '{a} of {b} apps',
+      'home.wApps': 'Apps logged', 'home.todayLabel': 'notifications today', 'home.week': 'This week', 'status.on': 'Listening', 'status.off': 'Access off', 'home.wToday': 'Today', 'home.ofApps': '{a} of {b} apps',
       'home.todaySub': 'notifications · {n} this week',
       'home.recent': 'Recent', 'home.apps': 'Apps', 'home.appsFoot': 'Turn an app off to stop saving its notifications in History.',
       'home.noRecent': 'No notifications yet', 'home.noRecentSub': 'New notifications will appear here.',
@@ -56,7 +56,7 @@
     },
     fa: {
       'home.title': 'اعلان‌ها', 'home.sub': 'اعلان‌های برنامه‌هایتان را مدیریت و دنبال کنید',
-      'home.wApps': 'برنامه‌های فعال', 'home.wToday': 'امروز', 'home.ofApps': '{a} از {b} برنامه',
+      'home.wApps': 'برنامه‌های فعال', 'home.todayLabel': 'اعلان در امروز', 'home.week': 'این هفته', 'status.on': 'در حال ثبت', 'status.off': 'دسترسی خاموش', 'home.wToday': 'امروز', 'home.ofApps': '{a} از {b} برنامه',
       'home.todaySub': 'اعلان · {n} در این هفته',
       'home.recent': 'آخرین اعلان‌ها', 'home.apps': 'برنامه‌ها', 'home.appsFoot': 'با خاموش کردن هر برنامه، اعلان‌های آن دیگر در تاریخچه ذخیره نمی‌شوند.',
       'home.noRecent': 'هنوز اعلانی نیامده', 'home.noRecentSub': 'اعلان‌های جدید این‌جا نمایش داده می‌شوند.',
@@ -196,7 +196,7 @@
   }
   function cssEsc(s) { return String(s).replace(/["\\]/g, '\\$&'); }
   function debounce(fn, ms) { var h; return function () { var a = arguments; clearTimeout(h); h = setTimeout(function () { fn.apply(null, a); }, ms); }; }
-  var PALETTE = ['#007aff', '#34c759', '#ff9500', '#af52de', '#ff2d55', '#5856d6', '#30b0c7', '#ff3b30'];
+  var PALETTE = ['#3a7bd5', '#2f9e74', '#c2773a', '#7a5fc9', '#c2546f', '#4b8fa8', '#5d6b82'];
   function avatar(name, pkg) {
     var s = String(pkg || name || '?'); var h = 0;
     for (var i = 0; i < s.length; i++) h = (h * 31 + s.charCodeAt(i)) >>> 0;
@@ -384,23 +384,22 @@
     $('#accessBanner').innerHTML = S.listener ? '' :
       '<div class="banner glass"><span class="b-ic">' + ic('bellSlash') + '</span><div class="b-body"><b>' + t('access.title') + '</b><small>' + t('access.sub') + '</small></div><button class="pill-btn" data-action="grant">' + t('access.btn') + '</button></div>';
 
-    // widget: apps ring
+    // hero
     var on = S.apps.filter(function (a) { return a.enabled; }).length;
-    var pct = S.apps.length ? Math.round(on * 100 / S.apps.length) : 0;
-    $('#pct').textContent = num(pct) + (LANG === 'fa' ? '٪' : '%');
-    $('#pctSub').textContent = t('home.ofApps', { a: num(on), b: num(S.apps.length) });
-    $('#ringFg').style.strokeDashoffset = String(169.65 * (1 - pct / 100));
-
-    // widget: today
+    var blocked = S.apps.filter(function (a) { return a.blocked; }).length;
     var st = S.stats || {};
     var wk = st.week || [];
-    var weekTotal = wk.reduce(function (s, d) { return s + (d.count || 0); }, 0);
+    var weekTotal = wk.reduce(function (s2, d) { return s2 + (d.count || 0); }, 0);
+    var pill = $('#statusPill');
+    pill.className = 'status' + (S.listener ? '' : ' off');
+    pill.textContent = t(S.listener ? 'status.on' : 'status.off');
+    if (S.listener) pill.removeAttribute('data-action'); else pill.setAttribute('data-action', 'grant');
+    $('#heroDate').textContent = fmt('day', Date.now());
     $('#todayNum').textContent = short(st.today || 0);
-    $('#todaySub').textContent = t('home.todaySub', { n: short(weekTotal) });
-    var max = Math.max.apply(null, wk.map(function (d) { return d.count; }).concat([1]));
-    $('#spark').innerHTML = (wk.length ? wk : [0, 0, 0, 0, 0, 0, 0].map(function () { return { count: 0 }; })).map(function (d) {
-      return '<span style="height:' + Math.max(10, Math.round(d.count * 100 / max)) + '%"></span>';
-    }).join('');
+    $('#hsWeek').textContent = short(weekTotal);
+    $('#hsApps').textContent = num(on) + '/' + num(S.apps.length);
+    $('#hsBlocked').textContent = num(blocked);
+    $('#spark').innerHTML = sparkSvg(wk.map(function (d) { return d.count || 0; }), 160, 60, 'sparkGrad', true);
 
     // recent
     var rec = $('#homeRecent');
@@ -439,6 +438,30 @@
       '</div>';
   }
 
+  // ================================================================== smooth line / area chart (SVG)
+  function smoothPath(pts) {
+    if (pts.length < 2) return '';
+    var d = 'M' + pts[0][0] + ',' + pts[0][1];
+    for (var k = 0; k < pts.length - 1; k++) {
+      var p0 = pts[k - 1] || pts[k], p1 = pts[k], p2 = pts[k + 1], p3 = pts[k + 2] || p2;
+      var c1x = p1[0] + (p2[0] - p0[0]) / 6, c1y = p1[1] + (p2[1] - p0[1]) / 6;
+      var c2x = p2[0] - (p3[0] - p1[0]) / 6, c2y = p2[1] - (p3[1] - p1[1]) / 6;
+      d += ' C' + c1x.toFixed(1) + ',' + c1y.toFixed(1) + ' ' + c2x.toFixed(1) + ',' + c2y.toFixed(1) + ' ' + p2[0].toFixed(1) + ',' + p2[1].toFixed(1);
+    }
+    return d;
+  }
+  function sparkSvg(vals, w, h, gradId, dot) {
+    if (!vals.length) vals = [0, 0, 0, 0, 0, 0, 0];
+    var max = Math.max.apply(null, vals.concat([1])), pad = 4;
+    var pts = vals.map(function (v, k) { return [pad + k * (w - 2 * pad) / Math.max(1, vals.length - 1), h - pad - (v / max) * (h - 2 * pad)]; });
+    var line = smoothPath(pts);
+    var last = pts[pts.length - 1];
+    return '<defs><linearGradient id="' + gradId + '" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="var(--accent)" stop-opacity=".28"/><stop offset="1" stop-color="var(--accent)" stop-opacity="0"/></linearGradient></defs>' +
+      '<path class="area" d="' + line + ' L' + last[0] + ',' + h + ' L' + pts[0][0] + ',' + h + ' Z"/>' +
+      '<path class="line" d="' + line + '"/>' +
+      (dot ? '<circle class="dot" cx="' + last[0] + '" cy="' + last[1] + '" r="4"/>' : '');
+  }
+
   // ================================================================== STATS
   function renderStats() {
     S.stats = json('getStats') || S.stats || {};
@@ -462,8 +485,7 @@
     }).join('');
 
     var hrs = st.hours || [];
-    var hmax = Math.max.apply(null, hrs.concat([1]));
-    $('#hourChart').innerHTML = hrs.map(function (v) { return '<span style="height:' + Math.max(3, Math.round(v * 100 / hmax)) + '%"></span>'; }).join('');
+    $('#hourChart').innerHTML = '<svg viewBox="0 0 300 96" preserveAspectRatio="none">' + sparkSvg(hrs.length ? hrs : [0, 0], 300, 96, 'hourGrad', false) + '</svg>';
     $('#hourAxis').innerHTML = [0, 6, 12, 18, 23].map(function (h) { return '<span>' + num(h) + '</span>'; }).join('');
 
     var top = st.top || [];
@@ -660,7 +682,7 @@
         row('red', 'trash', t('settings.clearAll'), '', 'clear', null, ' danger') +
       '</div>' +
       '<div class="about"><div class="logo">' + ic('bellFill') + '</div><b>' + t('test.title') + '</b>' +
-        t('about.version', { v: esc(S.info.versionName || '1.1.0') }) + '<br>' + t('about.by') + ' <span class="dev">' + esc(S.info.developer || 'PROTHOTECH') + '</span></div>';
+        t('about.version', { v: esc(S.info.versionName || '1.2.0') }) + '<br>' + t('about.by') + ' <span class="dev">' + esc(S.info.developer || 'PROTHOTECH') + '</span></div>';
   }
 
   // ================================================================== SHEET (app details)

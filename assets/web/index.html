@@ -1,200 +1,169 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="fa" dir="rtl">
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover">
-  <meta name="theme-color" content="#05060a">
+  <meta name="color-scheme" content="light dark">
   <meta name="author" content="PROTHOTECH">
   <title>Notification Manager</title>
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div id="app">
-  <div class="bg-fx" aria-hidden="true">
-    <span class="streak s1"></span><span class="streak s2"></span><span class="streak s3"></span>
-  </div>
+<div class="backdrop" aria-hidden="true"><span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span></div>
 
-  <main id="views">
+<main id="views">
 
-    <!-- ============================== HOME ============================== -->
-    <section id="view-home" class="view active" data-view="home">
-      <header class="top">
-        <button class="round-btn" data-go="settings" aria-label="Settings"><i data-ic="gear"></i></button>
-        <div class="title-wrap">
-          <h1>Notification <span>Manager</span></h1>
-          <p>Control and manage your app notifications</p>
-        </div>
-        <button class="round-btn bell-btn" data-go="history" aria-label="Unread notifications">
-          <i data-ic="bell"></i><b class="badge hidden" id="badge">0</b>
-        </button>
-      </header>
+  <!-- ======================================================= HOME -->
+  <section class="view tab active" data-view="home">
+    <header class="navbar">
+      <span class="nav-side"></span>
+      <span class="nav-title" data-t="home.title"></span>
+      <span class="nav-side end">
+        <button class="nav-btn" data-go="history" data-t-aria="nav.unread"><i data-ic="bell"></i><b class="badge hidden" id="badge"></b></button>
+        <button class="nav-btn" data-push="settings" data-t-aria="settings.title"><i data-ic="gear"></i></button>
+      </span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="home.title"></h1>
+      <p class="large-sub" data-t="home.sub"></p>
 
-      <div class="card neon dash" id="dash">
-        <div class="ring-wrap">
-          <svg class="ring" viewBox="0 0 120 120">
-            <defs>
-              <linearGradient id="ringGrad" x1="0" y1="0" x2="1" y2="1">
-                <stop offset="0" stop-color="#7ff6ff"/>
-                <stop offset="1" stop-color="#00b8d9"/>
-              </linearGradient>
-            </defs>
-            <circle class="ring-bg" cx="60" cy="60" r="50"/>
-            <circle class="ring-fg" id="ringFg" cx="60" cy="60" r="50"/>
-          </svg>
-          <div class="ring-center">
-            <i data-ic="bell" class="ring-bell"></i>
-            <strong id="pct">0%</strong>
+      <div id="accessBanner"></div>
+
+      <div class="widgets">
+        <button class="widget glass" data-go="apps">
+          <div class="w-head"><span class="w-ic blue"><i data-ic="apps"></i></span><span data-t="home.wApps"></span></div>
+          <div class="ring-row">
+            <svg class="ring" viewBox="0 0 64 64"><circle class="ring-bg" cx="32" cy="32" r="27"/><circle class="ring-fg" id="ringFg" cx="32" cy="32" r="27"/></svg>
+            <div><strong id="pct" class="w-big">0</strong><small id="pctSub" class="w-sub"></small></div>
           </div>
-        </div>
-        <div class="dash-div"></div>
-        <div class="dash-info">
-          <span class="dash-label">Notifications for Apps</span>
-          <button class="dash-state" id="dashState"><span>Checking…</span></button>
-        </div>
-        <div class="mini-chart" id="miniChart"></div>
+        </button>
+        <button class="widget glass" data-go="stats">
+          <div class="w-head"><span class="w-ic purple"><i data-ic="chart"></i></span><span data-t="home.wToday"></span></div>
+          <div class="today-row"><strong id="todayNum" class="w-big">0</strong><div class="spark" id="spark"></div></div>
+          <small class="w-sub" id="todaySub"></small>
+        </button>
       </div>
 
-      <div class="actions">
-        <button class="act act-purple" data-action="clear"><i data-ic="trash"></i><span>Clear<br>History</span></button>
-        <button class="act act-gold" data-go="history"><i data-ic="history"></i><span>History</span></button>
-        <button class="act act-cyan" data-go="settings"><i data-ic="sliders"></i><span>Settings</span></button>
-        <button class="act act-red" data-go="blocked"><i data-ic="shield"></i><span>Blocked Apps</span></button>
+      <div class="quick">
+        <button data-go="history"><span class="q-ic glass blue"><i data-ic="clock"></i></span><span data-t="q.history"></span></button>
+        <button data-push="blocked"><span class="q-ic glass red"><i data-ic="bellSlash"></i></span><span data-t="q.blocked"></span></button>
+        <button data-action="test"><span class="q-ic glass purple"><i data-ic="send"></i></span><span data-t="q.test"></span></button>
+        <button data-action="clear"><span class="q-ic glass orange"><i data-ic="trash"></i></span><span data-t="q.clear"></span></button>
       </div>
 
-      <div class="section-pill" id="homeAppsHead">
-        <button class="pill-toggle" id="homeCollapse"><i data-ic="chevDown"></i></button>
-        <span class="pill-title">Apps Notifications</span>
-        <span class="pill-count" id="homeAppsCount">(0 Apps)</span>
-        <button class="pill-grid" data-go="apps" aria-label="All apps"><i data-ic="grid"></i></button>
-      </div>
-      <div class="app-list" id="homeApps"></div>
+      <div class="sec-head"><span data-t="home.recent"></span><button class="link" data-go="history" data-t="common.seeAll"></button></div>
+      <div class="group glass" id="homeRecent"></div>
 
-      <div class="card neon recent" id="recentCard">
-        <div class="recent-head">
-          <span><i data-ic="chevLeft"></i> Recently Notification</span>
-          <button class="recent-clock" data-go="history" aria-label="History"><i data-ic="clock"></i></button>
-        </div>
-        <div class="recent-body" id="recentBody"></div>
-      </div>
-    </section>
-
-    <!-- ============================== STATS ============================== -->
-    <section id="view-stats" class="view" data-view="stats">
-      <header class="sub-top">
-        <h2>Statistics</h2>
-        <p>How your apps reach you</p>
-      </header>
-      <div class="tiles" id="statTiles"></div>
-      <div class="card neon chart-card">
-        <div class="card-title">Last 7 days</div>
-        <div class="week-chart" id="weekChart"></div>
-      </div>
-      <div class="card neon chart-card">
-        <div class="card-title">By hour of day</div>
-        <div class="hour-chart" id="hourChart"></div>
-        <div class="hour-axis"><span>00</span><span>06</span><span>12</span><span>18</span><span>23</span></div>
-      </div>
-      <div class="card neon chart-card">
-        <div class="card-title">Top apps</div>
-        <div id="topApps"></div>
-      </div>
-    </section>
-
-    <!-- ============================== HISTORY ============================== -->
-    <section id="view-history" class="view" data-view="history">
-      <header class="sub-top with-actions">
-        <div>
-          <h2>History</h2>
-          <p id="historySub">All logged notifications</p>
-        </div>
-        <div class="head-actions">
-          <button class="round-btn sm" data-action="share" aria-label="Export"><i data-ic="share"></i></button>
-          <button class="round-btn sm danger" data-action="clear" aria-label="Clear"><i data-ic="trash"></i></button>
-        </div>
-      </header>
-      <label class="search">
-        <i data-ic="search"></i>
-        <input id="historySearch" type="search" placeholder="Search title, text or app" autocomplete="off">
-      </label>
-      <div class="chips" id="historyChips"></div>
-      <div id="historyList" class="history-list"></div>
-      <div id="historyMore" class="list-foot"></div>
-    </section>
-
-    <!-- ============================== APPS ============================== -->
-    <section id="view-apps" class="view" data-view="apps">
-      <header class="sub-top">
-        <h2>Apps</h2>
-        <p id="appsSub">Choose which apps are logged</p>
-      </header>
-      <label class="search">
-        <i data-ic="search"></i>
-        <input id="appsSearch" type="search" placeholder="Search apps" autocomplete="off">
-      </label>
-      <div class="seg" id="appsSeg">
-        <button data-f="all" class="on">All</button>
-        <button data-f="enabled">Enabled</button>
-        <button data-f="disabled">Disabled</button>
-        <button data-f="user">User apps</button>
-      </div>
-      <div class="bulk">
-        <button class="ghost-btn" data-action="enableAll">Enable shown</button>
-        <button class="ghost-btn" data-action="disableAll">Disable shown</button>
-      </div>
-      <div class="app-list" id="appsList"></div>
-    </section>
-
-    <!-- ============================== BLOCKED ============================== -->
-    <section id="view-blocked" class="view" data-view="blocked">
-      <header class="sub-top with-back">
-        <button class="round-btn sm" data-back aria-label="Back"><i data-ic="chevLeft"></i></button>
-        <div>
-          <h2>Blocked Apps</h2>
-          <p>Notifications from these apps are dismissed instantly</p>
-        </div>
-      </header>
-      <div class="card neon info-card red-ring" id="blockedInfo"></div>
-      <label class="search">
-        <i data-ic="search"></i>
-        <input id="blockedSearch" type="search" placeholder="Search apps to block" autocomplete="off">
-      </label>
-      <div class="app-list" id="blockedList"></div>
-    </section>
-
-    <!-- ============================== SETTINGS ============================== -->
-    <section id="view-settings" class="view" data-view="settings">
-      <header class="sub-top with-back">
-        <button class="round-btn sm" data-back aria-label="Back"><i data-ic="chevLeft"></i></button>
-        <div>
-          <h2>Settings</h2>
-          <p>Permissions, logging and storage</p>
-        </div>
-      </header>
-      <div id="settingsBody"></div>
-    </section>
-  </main>
-
-  <!-- ============================== NAV ============================== -->
-  <nav class="bottom-nav" id="nav">
-    <button data-tab="stats"><i data-ic="stats"></i><span>Stats</span></button>
-    <button data-tab="history"><i data-ic="history"></i><span>History</span></button>
-    <button data-tab="home" class="on"><i data-ic="home"></i><span>Home</span></button>
-    <button data-tab="apps"><i data-ic="grid"></i><span>Apps</span></button>
-  </nav>
-
-  <!-- ============================== SHEET / DIALOG / TOAST ============================== -->
-  <div class="scrim" id="scrim"></div>
-  <div class="sheet" id="sheet" role="dialog" aria-modal="true"></div>
-  <div class="dialog" id="dialog" role="alertdialog" aria-modal="true">
-    <h3 id="dlgTitle"></h3>
-    <p id="dlgText"></p>
-    <div class="dlg-actions">
-      <button class="ghost-btn" id="dlgCancel">Cancel</button>
-      <button class="danger-btn" id="dlgOk">OK</button>
+      <div class="sec-head"><span data-t="home.apps"></span><button class="link" data-go="apps" data-t="common.seeAll"></button></div>
+      <div class="group glass" id="homeApps"></div>
+      <p class="sec-foot" data-t="home.appsFoot"></p>
     </div>
-  </div>
-  <div class="toast" id="toast"></div>
-</div>
+  </section>
+
+  <!-- ======================================================= HISTORY -->
+  <section class="view tab" data-view="history">
+    <header class="navbar">
+      <span class="nav-side"></span>
+      <span class="nav-title" data-t="history.title"></span>
+      <span class="nav-side end"><button class="nav-btn" data-action="historyMenu" data-t-aria="common.more"><i data-ic="more"></i></button></span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="history.title"></h1>
+      <p class="large-sub" id="historySub"></p>
+      <label class="search glass-soft"><i data-ic="search"></i><input id="historySearch" type="search" autocomplete="off" data-t-ph="history.search"></label>
+      <div class="chips" id="historyChips"></div>
+      <div id="historyList"></div>
+      <div id="historyMore" class="list-foot"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= STATS -->
+  <section class="view tab" data-view="stats">
+    <header class="navbar">
+      <span class="nav-side"></span>
+      <span class="nav-title" data-t="stats.title"></span>
+      <span class="nav-side end"></span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="stats.title"></h1>
+      <p class="large-sub" data-t="stats.sub"></p>
+      <div class="tiles" id="statTiles"></div>
+      <div class="sec-head"><span data-t="stats.week"></span></div>
+      <div class="card glass"><div class="week-chart" id="weekChart"></div></div>
+      <div class="sec-head"><span data-t="stats.hours"></span></div>
+      <div class="card glass"><div class="hour-chart" id="hourChart"></div><div class="hour-axis" id="hourAxis"></div></div>
+      <div class="sec-head"><span data-t="stats.top"></span></div>
+      <div class="group glass" id="topApps"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= APPS -->
+  <section class="view tab" data-view="apps">
+    <header class="navbar">
+      <span class="nav-side"></span>
+      <span class="nav-title" data-t="apps.title"></span>
+      <span class="nav-side end"><button class="nav-text" data-action="appsMenu" data-t="common.edit"></button></span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="apps.title"></h1>
+      <p class="large-sub" id="appsSub"></p>
+      <label class="search glass-soft"><i data-ic="search"></i><input id="appsSearch" type="search" autocomplete="off" data-t-ph="apps.search"></label>
+      <div class="segmented" id="appsSeg">
+        <button data-f="all" data-t="apps.fAll"></button>
+        <button data-f="enabled" data-t="apps.fOn"></button>
+        <button data-f="disabled" data-t="apps.fOff"></button>
+        <button data-f="user" data-t="apps.fUser"></button>
+      </div>
+      <div class="group glass" id="appsList"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= BLOCKED (pushed) -->
+  <section class="view page" data-view="blocked">
+    <header class="navbar">
+      <span class="nav-side"><button class="back" data-back><i data-ic="chevBack" class="flip"></i><span data-t="common.back"></span></button></span>
+      <span class="nav-title" data-t="blocked.title"></span>
+      <span class="nav-side end"></span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="blocked.title"></h1>
+      <p class="large-sub" id="blockedSub"></p>
+      <div class="card glass info" id="blockedInfo"></div>
+      <label class="search glass-soft"><i data-ic="search"></i><input id="blockedSearch" type="search" autocomplete="off" data-t-ph="apps.search"></label>
+      <div class="group glass" id="blockedList"></div>
+    </div>
+  </section>
+
+  <!-- ======================================================= SETTINGS (pushed) -->
+  <section class="view page" data-view="settings">
+    <header class="navbar">
+      <span class="nav-side"><button class="back" data-back><i data-ic="chevBack" class="flip"></i><span data-t="common.back"></span></button></span>
+      <span class="nav-title" data-t="settings.title"></span>
+      <span class="nav-side end"></span>
+    </header>
+    <div class="content">
+      <h1 class="large-title" data-t="settings.title"></h1>
+      <div id="settingsBody"></div>
+    </div>
+  </section>
+</main>
+
+<!-- ======================================================= TAB BAR -->
+<nav class="tabbar glass-strong" id="tabbar">
+  <span class="tab-pill" id="tabPill"></span>
+  <button data-tab="home"><i data-ic="home"></i><span data-t="tab.home"></span></button>
+  <button data-tab="history"><i data-ic="clock"></i><span data-t="tab.history"></span></button>
+  <button data-tab="stats"><i data-ic="chart"></i><span data-t="tab.stats"></span></button>
+  <button data-tab="apps"><i data-ic="apps"></i><span data-t="tab.apps"></span></button>
+</nav>
+
+<!-- ======================================================= OVERLAYS -->
+<div class="scrim" id="scrim"></div>
+<div class="sheet glass-strong" id="sheet" role="dialog" aria-modal="true"></div>
+<div class="actionsheet" id="actionsheet" role="dialog" aria-modal="true"></div>
+<div class="alert glass-strong" id="alert" role="alertdialog" aria-modal="true"></div>
+<div class="hud glass-strong" id="hud"></div>
+
 <script src="app.js"></script>
 </body>
 </html>

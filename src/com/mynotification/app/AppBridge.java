@@ -369,8 +369,9 @@ public class AppBridge {
             PendingIntent pi = PendingIntent.getActivity(ctx, 0, open, piFlags);
             SimpleDateFormat f = new SimpleDateFormat("HH:mm:ss", Locale.US);
             b.setSmallIcon(R.drawable.ic_stat_notify)
-                    .setContentTitle("Notification Manager")
-                    .setContentText("Test notification at " + f.format(new Date()) + " ✓")
+                    .setContentTitle(testTitle != null ? testTitle : "Notification Manager")
+                    .setContentText((testText != null ? testText : "Test notification")
+                            + " \u2022 " + f.format(new Date()))
                     .setAutoCancel(true)
                     .setContentIntent(pi);
             nm.notify((int) (System.currentTimeMillis() % 100000), b.build());
@@ -379,6 +380,32 @@ public class AppBridge {
             Log.e(TAG, "test notification", e);
             return false;
         }
+    }
+
+    /** Same as sendTestNotification() but with text supplied by the (localized) UI. */
+    @JavascriptInterface
+    public boolean sendTestNotificationText(String title, String text) {
+        testTitle = title;
+        testText = text;
+        return sendTestNotification();
+    }
+
+    String testTitle = null;
+    String testText = null;
+
+    /** Tells Java which theme the web UI is showing, so the system bars match. */
+    @JavascriptInterface
+    public void setSystemBars(final boolean dark) {
+        if (activity instanceof MainActivity) {
+            final MainActivity m = (MainActivity) activity;
+            m.runOnUiThread(() -> m.applySystemBars(dark));
+        }
+    }
+
+    @JavascriptInterface
+    public boolean isSystemDark() {
+        if (activity instanceof MainActivity) return ((MainActivity) activity).isSystemDark();
+        return false;
     }
 
     boolean startSafely(Intent i) {

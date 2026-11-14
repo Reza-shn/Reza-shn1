@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">مدیریت اعلان‌ها</string>
+    <string name="listener_label">شنونده‌ی مدیریت اعلان‌ها</string>
+    <string name="developer">PROTHOTECH</string>
+    <string name="test_channel">اعلان‌های آزمایشی</string>
+</resources>

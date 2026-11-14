@@ -4,6 +4,7 @@ import android.annotation.SuppressLint;
 import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.content.res.Configuration;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Build;
@@ -44,7 +45,7 @@ public class MainActivity extends Activity {
         setupWindow();
 
         web = new WebView(this);
-        web.setBackgroundColor(Color.parseColor("#05060A"));
+        web.setBackgroundColor(isSystemDark() ? Color.BLACK : Color.parseColor("#F2F2F7"));
         web.setOverScrollMode(View.OVER_SCROLL_NEVER);
         web.setVerticalScrollBarEnabled(false);
         web.setHorizontalScrollBarEnabled(false);
@@ -99,10 +100,39 @@ public class MainActivity extends Activity {
     }
 
     void setupWindow() {
+        applySystemBars(isSystemDark());
+    }
+
+    boolean isSystemDark() {
+        return (getResources().getConfiguration().uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+    }
+
+    /** Matches status / navigation bars to the web theme (light = iOS grouped gray). */
+    void applySystemBars(boolean dark) {
+        int bg = dark ? Color.BLACK : Color.parseColor("#F2F2F7");
         Window w = getWindow();
         w.addFlags(WindowManager.LayoutParams.FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS);
-        w.setStatusBarColor(Color.parseColor("#05060A"));
-        w.setNavigationBarColor(Color.parseColor("#05060A"));
+        w.setStatusBarColor(bg);
+        w.setNavigationBarColor(bg);
+        if (web != null) web.setBackgroundColor(bg);
+        View decor = w.getDecorView();
+        int flags = decor.getSystemUiVisibility();
+        if (Build.VERSION.SDK_INT >= 23) {
+            if (dark) flags &= ~View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+            else flags |= View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR;
+        }
+        if (Build.VERSION.SDK_INT >= 26) {
+            if (dark) flags &= ~View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+            else flags |= View.SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR;
+        }
+        decor.setSystemUiVisibility(flags);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        runJs("window.onSystemTheme && window.onSystemTheme(" + isSystemDark() + ")");
     }
 
     /** Keeps app pages inside the WebView; anything else opens externally. */

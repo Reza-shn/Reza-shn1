@@ -1,0 +1,42 @@
+name: Fetch Vazirmatn font
+
+on:
+  push:
+    branches: [ notification-manager ]
+    paths: [ '.github/workflows/fetch-font.yml' ]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  font:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download Vazirmatn (OFL-1.1)
+        run: |
+          set -e
+          mkdir -p assets/web/fonts /tmp/vz && cd /tmp/vz
+          ok=0
+          for u in \
+            "https://raw.githubusercontent.com/rastikerdar/vazirmatn/master/fonts/webfonts/Vazirmatn%5Bwght%5D.woff2" \
+            "https://cdn.jsdelivr.net/gh/rastikerdar/vazirmatn@master/fonts/webfonts/Vazirmatn%5Bwght%5D.woff2"; do
+            if curl -fsSL -o Vazirmatn.woff2 "$u"; then ok=1; break; fi
+          done
+          if [ $ok = 0 ]; then
+            npm pack vazirmatn >/dev/null
+            tar xzf vazirmatn-*.tgz
+            f=$(find package -name 'Vazirmatn*wght*.woff2' | head -1)
+            cp "$f" Vazirmatn.woff2
+          fi
+          curl -fsSL -o OFL.txt "https://raw.githubusercontent.com/rastikerdar/vazirmatn/master/OFL.txt" || echo "SIL Open Font License 1.1 - Vazirmatn by Saber Rastikerdar" > OFL.txt
+          ls -la
+          cp Vazirmatn.woff2 OFL.txt "$GITHUB_WORKSPACE/assets/web/fonts/"
+      - name: Commit font
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add assets/web/fonts
+          git commit -m "Add Vazirmatn font (OFL)" || echo "nothing to commit"
+          git push
